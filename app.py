@@ -1,7 +1,11 @@
 import streamlit as st
 import csv
 import re
+import os
+import zipfile
+import tempfile
 from io import StringIO
+
 
 st.set_page_config(page_title="XML Tools", page_icon="🔧", layout="wide")
 
@@ -152,10 +156,8 @@ if menu == "📁 Extraction multiple":
             st.warning("Aucune balise <Name> détectée dans les fichiers fournis.")
 
 
-import zipfile
-import tempfile
+elif menu == "🔁 Remplacement multiple":
 
-if menu == "🔁 Remplacement multiple":
     st.header("🔁 Remplacement groupé sur plusieurs XML")
 
     uploaded_xmls = st.file_uploader(
