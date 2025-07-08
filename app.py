@@ -15,7 +15,8 @@ st.markdown(
     """
 )
 
-menu = st.sidebar.radio("Navigation", ["📌 Extraction", "🔄 Remplacement"])
+menu = st.sidebar.radio("Navigation", ["📌 Extraction", "🔄 Remplacement", "📁 Extraction multiple"])
+
 
 if menu == "📌 Extraction":
     st.header("Étape 1 : Extraction des balises <Name> vers un CSV")
@@ -73,6 +74,50 @@ if menu == "🔄 Remplacement":
             file_name="xml_modifie.xml",
             mime="application/xml"
         )
+
+import os
+import zipfile
+import tempfile
+
+if menu == "📁 Extraction multiple":
+    st.header("📁 Extraction groupée de plusieurs fichiers XML")
+
+    uploaded_files = st.file_uploader(
+        "Déposez plusieurs fichiers XML ici",
+        type="xml",
+        accept_multiple_files=True
+    )
+
+    if uploaded_files:
+        all_names = set()
+        for file in uploaded_files:
+            try:
+                xml_content = file.read().decode("utf-8")
+                noms = re.findall(r"<Name>\s*(.*?)\s*</Name>", xml_content)
+                all_names.update(n.strip() for n in noms)
+            except Exception as e:
+                st.error(f"Erreur avec le fichier {file.name} : {e}")
+
+        if all_names:
+            valeurs_uniques = sorted(all_names)
+
+            output = StringIO()
+            writer = csv.writer(output, delimiter=";")
+            writer.writerow(["ancien", "nouveau"])
+            for name in valeurs_uniques:
+                writer.writerow([name, ""])
+
+            st.success(f"{len(valeurs_uniques)} balises uniques extraites de {len(uploaded_files)} fichiers.")
+            st.download_button(
+                "⬇️ Télécharger le CSV global à éditer",
+                data=output.getvalue(),
+                file_name="extraction_globale.csv",
+                mime="text/csv"
+            )
+        else:
+            st.warning("Aucune balise <Name> détectée dans les fichiers fournis.")
+
+
 
 st.markdown("---")
 st.caption("🛠️ Développé avec Python & Streamlit — adapté à vos besoins. 🚀")
